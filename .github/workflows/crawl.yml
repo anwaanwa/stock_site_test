@@ -1,0 +1,38 @@
+name: 주식 갤러리 크롤링 & AI 분석
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # 매 시간 정각 실행 (UTC 기준)
+  workflow_dispatch:        # 수동 실행 버튼도 제공
+
+jobs:
+  crawl-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Chrome 설치
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: ChromeDriver 설치
+        uses: nanasess/setup-chromedriver@v2
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 크롤링 & 분석 실행
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python main.py
